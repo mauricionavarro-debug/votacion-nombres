@@ -118,14 +118,8 @@
             color: var(--gray-text);
             flex-wrap: wrap;
         }
-        .admin-bar .admin-label {
-            font-weight: 600;
-            color: #7a5c00;
-        }
-        .admin-note {
-            font-size: .75rem;
-            color: var(--gray-text);
-        }
+        .admin-bar .admin-label { font-weight: 600; color: #7a5c00; }
+        .admin-note { font-size: .75rem; color: var(--gray-text); }
         .btn-reset {
             background: var(--red);
             color: white;
@@ -242,6 +236,7 @@
             opacity: 1;
             transition: opacity .4s;
             box-shadow: 0 4px 12px rgba(0,0,0,.25);
+            max-width: 360px;
         }
         .toast.error { background: var(--red); }
 
@@ -309,6 +304,7 @@ const WEBHOOK_URL     = "https://workflow.grupoalefsi.com/webhook/4e2e714c-ff22-
 const BASIC_AUTH_USER = "Mauricio";
 const BASIC_AUTH_PASS = "Mauricio88";
 const ADMIN_EMAIL     = "mauricionavarro@recursoconfiable.com";
+const TIMEOUT_MS      = 10000; // 10 segundos máximo de espera
 
 // ── Lista blanca de correos autorizados ──────────────────────
 const CORREOS_AUTORIZADOS = new Set([
@@ -318,8 +314,7 @@ const CORREOS_AUTORIZADOS = new Set([
     "albertocolin@recursoconfiable.com",
     "sofiavazquez@recursoconfiable.com",
     "carlosalvarez@recursoconfiable.com",
-    "mauricionavarro@recursoconfiable.com",
-    "julioarias@recursoconfiable.com"
+    "mauricionavarro@recursoconfiable.com"
 ]);
 
 // ── Correos de proponentes ───────────────────────────────────
@@ -392,11 +387,19 @@ function showToast(msg, isError = false) {
     setTimeout(() => {
         el.style.opacity = '0';
         setTimeout(() => el.remove(), 450);
-    }, 3200);
+    }, 4000);
 }
 
 function validarCorreo(email) {
     return /^[a-zA-Z0-9._%+\-]+@recursoconfiable\.com$/.test(email.trim().toLowerCase());
+}
+
+// ── Fetch con timeout ────────────────────────────────────────
+function fetchConTimeout(url, opciones, ms) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ms);
+    return fetch(url, { ...opciones, signal: controller.signal })
+        .finally(() => clearTimeout(timer));
 }
 
 // ============================================================
@@ -445,13 +448,22 @@ function puedeVotar(anterior, persona) {
     return true;
 }
 
-async function enviarVoto(anterior, propuesto, persona) {
+// Restaura el botón a su estado original si algo falla
+function restaurarBtn(btn) {
+    btn.disabled    = false;
+    btn.textContent = '👍 Votar';
+}
+
+async function enviarVoto(anterior, propuesto, persona, btn) {
+    // Validaciones previas
     if (userVotesBySistema.has(anterior)) {
         showToast("❌ Ya emitiste tu voto para " + anterior, true);
+        restaurarBtn(btn);
         return;
     }
     if (PROPONENTES_EMAIL[persona] === currentUserEmail) {
         showToast("❌ No puedes votar por tu propia propuesta", true);
+        restaurarBtn(btn);
         return;
     }
 
@@ -465,32 +477,48 @@ async function enviarVoto(anterior, propuesto, persona) {
 
     try {
         const creds = btoa(BASIC_AUTH_USER + ":" + BASIC_AUTH_PASS);
-        const res   = await fetch(WEBHOOK_URL, {
+
+        const res = await fetchConTimeout(WEBHOOK_URL, {
             method:  "POST",
             headers: {
                 "Authorization": "Basic " + creds,
                 "Content-Type":  "application/json"
             },
             body: JSON.stringify(payload)
-        });
+        }, TIMEOUT_MS);
 
         if (res.ok) {
             let data = {};
             try { data = await res.json(); } catch (_) {}
+
+            // Acepta: { status: "success" } o simplemente HTTP 200
             if (data.status === "success" || res.status === 200) {
                 guardarVotoLocal(currentUserEmail, anterior, propuesto);
-                renderizar();
+                renderizar(); // re-dibuja toda la UI con el nuevo estado
                 showToast('✅ Voto registrado: "' + propuesto + '" para ' + anterior);
             } else {
-                throw new Error(data.message || "Respuesta inesperada del servidor");
+                throw new Error(data.message || "El servidor respondió sin confirmar el voto");
             }
         } else {
-            const txt = await res.text();
-            throw new Error("HTTP " + res.status + " – " + txt.slice(0, 80));
+            let txt = "";
+            try { txt = await res.text(); } catch (_) {}
+            throw new Error("Error " + res.status + (txt ? ": " + txt.slice(0, 80) : ""));
         }
+
     } catch (err) {
         console.error("[Votación]", err);
-        showToast("❌ No se pudo registrar: " + err.message, true);
+
+        // Mensaje de error amigable según el tipo de fallo
+        if (err.name === "AbortError") {
+            showToast("❌ Tiempo de espera agotado. Verifica tu conexión e intenta de nuevo.", true);
+        } else if (err.message.includes("Failed to fetch") || err.message.includes("NetworkError")) {
+            showToast("❌ Sin conexión al servidor. Revisa tu internet e intenta de nuevo.", true);
+        } else {
+            showToast("❌ " + err.message, true);
+        }
+
+        // ── CRÍTICO: restaurar el botón para que el usuario pueda reintentar ──
+        restaurarBtn(btn);
     }
 }
 
@@ -545,6 +573,7 @@ function renderizar() {
     html += '</div>';
     appRoot.innerHTML = html;
 
+    // Pasar el propio botón a enviarVoto para poder restaurarlo si falla
     appRoot.querySelectorAll('.vote-btn:not([disabled])').forEach(btn => {
         btn.addEventListener('click', async () => {
             const anterior  = btn.dataset.anterior;
@@ -552,7 +581,7 @@ function renderizar() {
             const persona   = decodeURIComponent(btn.dataset.persona);
             btn.disabled    = true;
             btn.textContent = '⏳ Registrando…';
-            await enviarVoto(anterior, propuesto, persona);
+            await enviarVoto(anterior, propuesto, persona, btn);
         });
     });
 }
@@ -569,7 +598,6 @@ function iniciarVotacion(email) {
     loginSection.classList.add('hidden');
     votingSection.classList.remove('hidden');
 
-    // Panel admin solo para Mauricio
     if (currentUserEmail === ADMIN_EMAIL) {
         adminBar.classList.remove('hidden');
     }
