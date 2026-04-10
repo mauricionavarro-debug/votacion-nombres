@@ -1,392 +1,549 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recurso Confiable · Votación oficial</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Google Sans', 'Roboto', system-ui;
-            background: #f0f2f5;
-            padding: 2rem 1rem;
-            color: #202124;
+        :root {
+            --blue: #1a73e8;
+            --blue-light: #e8f0fe;
+            --green: #137333;
+            --green-light: #e6f4ea;
+            --red: #d93025;
+            --yellow: #fbbc04;
+            --yellow-light: #fef7e0;
+            --gray-bg: #f0f2f5;
+            --gray-border: #dadce0;
+            --gray-text: #5f6368;
+            --gray-dark: #202124;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', system-ui, sans-serif;
+            background: var(--gray-bg);
+            padding: 2rem 1rem;
+            color: var(--gray-dark);
+            min-height: 100vh;
+        }
+
         .container { max-width: 1200px; margin: 0 auto; }
+
+        /* ── Card base ── */
         .card {
             background: white;
             border-radius: 16px;
-            padding: 1.5rem 2rem;
+            padding: 1.75rem 2rem;
             margin-bottom: 2rem;
-            border: 1px solid #e0e0e0;
+            border: 1px solid var(--gray-border);
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
         }
-        .header h1 { font-size: 1.8rem; font-weight: 500; color: #1a73e8; }
-        .sub { color: #5f6368; margin-top: 0.5rem; }
-        .email-input {
+
+        /* ── Header ── */
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--blue);
+            letter-spacing: -.5px;
+        }
+        .header .sub {
+            color: var(--gray-text);
+            margin-top: .4rem;
+            font-size: .9rem;
+        }
+
+        /* ── Login ── */
+        .login-wrap {
+            margin-top: 1.25rem;
             display: flex;
-            gap: 1rem;
+            gap: .75rem;
             align-items: flex-end;
             flex-wrap: wrap;
-            margin-top: 1rem;
         }
-        .email-input input {
+        .login-wrap input {
             flex: 1;
-            padding: 0.8rem;
-            border: 1px solid #dadce0;
-            border-radius: 8px;
+            min-width: 240px;
+            padding: .75rem 1rem;
+            border: 1.5px solid var(--gray-border);
+            border-radius: 10px;
             font-size: 1rem;
+            font-family: inherit;
+            transition: border-color .2s;
+            outline: none;
         }
-        .email-input button {
-            background: #1a73e8;
+        .login-wrap input:focus { border-color: var(--blue); }
+        .btn-primary {
+            background: var(--blue);
             color: white;
             border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 500;
+            padding: .75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-family: inherit;
+            font-size: .95rem;
             cursor: pointer;
+            transition: opacity .15s;
         }
-        .error { color: #d93025; font-size: 0.85rem; margin-top: 0.5rem; }
+        .btn-primary:hover { opacity: .88; }
+        .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+        .error-msg { color: var(--red); font-size: .82rem; margin-top: .5rem; }
+
+        /* ── User banner ── */
+        .user-banner {
+            background: var(--blue-light);
+            border: 1px solid #c5d8fb;
+            border-radius: 10px;
+            padding: .6rem 1.2rem;
+            font-size: .85rem;
+            color: #1558b0;
+            font-weight: 500;
+            margin-top: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        /* ── Groups grid ── */
         .groups-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(550px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(520px, 1fr));
             gap: 1.5rem;
-            margin-top: 1rem;
         }
         .group-card {
             background: white;
-            border-radius: 12px;
-            border: 1px solid #e0e0e0;
+            border-radius: 14px;
+            border: 1px solid var(--gray-border);
             overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,.05);
         }
         .group-header {
             background: #f8f9fa;
-            padding: 1rem 1.5rem;
+            padding: .9rem 1.4rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid var(--gray-border);
         }
-        .group-header h2 { font-size: 1.35rem; font-weight: 500; color: #1a73e8; }
-        .voted-badge { font-size: 0.7rem; background: #e6f4ea; color: #137333; padding: 2px 8px; border-radius: 20px; }
+        .group-header h2 { font-size: 1.2rem; font-weight: 600; color: var(--blue); }
+        .voted-badge {
+            font-size: .7rem;
+            background: var(--green-light);
+            color: var(--green);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        /* ── Proposals ── */
         .proposals-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
+            gap: .75rem;
             padding: 1.25rem;
         }
         .proposal-item {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 0.9rem;
+            border: 1.5px solid var(--gray-border);
+            border-radius: 10px;
+            padding: .9rem;
+            transition: border-color .15s;
+        }
+        .proposal-item:hover { border-color: #aac4f5; }
+        .proposal-item.own-proposal {
+            background: var(--yellow-light);
+            border-left: 3px solid var(--yellow);
         }
         .prop-name {
-            font-size: 1.1rem;
-            font-weight: 500;
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--gray-dark);
         }
         .proposer {
-            font-size: 0.7rem;
-            color: #5f6368;
-            margin: 8px 0 6px;
+            font-size: .72rem;
+            color: var(--gray-text);
+            margin: 6px 0 10px;
+            font-family: 'DM Mono', monospace;
         }
         .vote-btn {
             background: transparent;
-            border: 1px solid #dadce0;
+            border: 1.5px solid var(--gray-border);
             border-radius: 24px;
-            padding: 6px 12px;
+            padding: 6px 14px;
             width: 100%;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: #1a73e8;
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--blue);
             cursor: pointer;
+            font-family: inherit;
+            transition: background .15s, border-color .15s;
         }
-        .vote-btn:hover:not(:disabled) { background: #e8f0fe; border-color: #1a73e8; }
+        .vote-btn:hover:not(:disabled) {
+            background: var(--blue-light);
+            border-color: var(--blue);
+        }
         .vote-btn:disabled {
-            opacity: 0.5;
+            opacity: .5;
             cursor: not-allowed;
             background: #f1f3f4;
+            color: var(--gray-text);
         }
-        .own-proposal {
-            background-color: #fef7e0;
-            border-left: 3px solid #fbbc04;
+        .vote-btn.voted-this {
+            background: var(--green-light);
+            border-color: var(--green);
+            color: var(--green);
         }
-        .toast-message {
+
+        /* ── Toast ── */
+        .toast {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 24px;
+            right: 24px;
             background: #323232;
             color: white;
-            padding: 8px 20px;
+            padding: 10px 20px;
             border-radius: 32px;
-            font-size: 0.8rem;
-            z-index: 1000;
+            font-size: .82rem;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity .4s;
+            box-shadow: 0 4px 12px rgba(0,0,0,.25);
         }
+        .toast.error { background: var(--red); }
+
+        /* ── Misc ── */
+        .hidden { display: none; }
+        .loader { text-align: center; padding: 3rem; color: var(--gray-text); }
         footer {
             text-align: center;
-            margin-top: 2rem;
-            font-size: 0.7rem;
+            margin-top: 2.5rem;
+            font-size: .7rem;
             color: #80868b;
         }
-        @media (max-width: 700px) {
+        @media (max-width: 680px) {
             .groups-grid { grid-template-columns: 1fr; }
             .proposals-grid { grid-template-columns: 1fr; }
         }
-        .loader { text-align: center; padding: 2rem; color: #5f6368; }
-        .hidden { display: none; }
     </style>
 </head>
 <body>
 <div class="container">
+
+    <!-- ── Header / Login ── -->
     <div class="card header">
-        <h1>Votación de nombres</h1>
+        <h1>🗳️ Votación de nombres</h1>
         <div class="sub">Recurso Confiable® · Elige las propuestas para cada sistema</div>
-        <div class="email-input" id="emailSection">
-            <input type="email" id="userEmail" placeholder="tu-correo@recursoconfiable.com" pattern=".*@recursoconfiable\.com$" required>
-            <button id="validateEmailBtn">Ingresar</button>
+
+        <!-- LOGIN (visible antes de autenticarse) -->
+        <div id="loginSection">
+            <div class="login-wrap">
+                <input type="email" id="userEmail"
+                    placeholder="tu-correo@recursoconfiable.com"
+                    autocomplete="email" />
+                <button class="btn-primary" id="enterBtn">Ingresar →</button>
+            </div>
+            <div id="emailError" class="error-msg"></div>
         </div>
-        <div id="emailError" class="error"></div>
+
+        <!-- BANNER de usuario autenticado -->
+        <div id="userBanner" class="user-banner hidden">
+            <span>👤</span>
+            <span id="userBannerText"></span>
+        </div>
     </div>
 
+    <!-- ── Voting area ── -->
     <div id="votingSection" class="hidden">
-        <div id="app-root"><div class="loader">Cargando propuestas...</div></div>
+        <div id="app-root"><div class="loader">Cargando propuestas…</div></div>
     </div>
-    <footer>Los votos se registran automáticamente</footer>
+
+    <footer>Los votos se registran automáticamente en el servidor · Recurso Confiable®</footer>
 </div>
 
 <script>
-    <button id="testWebhook" style="margin-top: 1rem; background: #1a73e8; color: white; border: none; padding: 8px 16px; border-radius: 8px;">🔍 Probar conexión con n8n</button>
-<div id="testResult" style="margin-top: 0.5rem; font-size: 0.8rem;"></div>
-    // ============================================================
-    // 1. CONFIGURACIÓN DEL WEBHOOK (TUS DATOS)
-    // ============================================================
-    const WEBHOOK_URL = "https://workflow.grupoalefsi.com/webhook/4e2e714c-ff22-430e-8288-f1cd94d8fb9f";
-    const BASIC_AUTH_USER = "Mauricio";
-    const BASIC_AUTH_PASS = "Mauricio88";
+// ============================================================
+// CONFIGURACIÓN
+// ============================================================
+const WEBHOOK_URL      = "https://workflow.grupoalefsi.com/webhook/4e2e714c-ff22-430e-8288-f1cd94d8fb9f";
+const BASIC_AUTH_USER  = "Mauricio";
+const BASIC_AUTH_PASS  = "Mauricio88";
 
-    // ============================================================
-    // 2. DATOS DE PROPUESTAS Y CORREOS DE PROPONENTES
-    // ============================================================
-    const PROPUESTAS = [
-        { persona: "Alberto Colin Enriquez", anterior: "AMS", propuesto: "NexAssets" },
-        { persona: "Alberto Colin Enriquez", anterior: "ITSM", propuesto: "NexService" },
-        { persona: "Alberto Colin Enriquez", anterior: "HCM", propuesto: "NexPeople" },
-        { persona: "Alberto Colin Enriquez", anterior: "CM", propuesto: "NexClients" },
-        { persona: "Alberto Colin Enriquez", anterior: "VMS", propuesto: "NexTrack" },
-        { persona: "Alberto Colin Enriquez", anterior: "MDM", propuesto: "NexData" },
-        { persona: "Mauricio Rodrigo Navarro Rojas", anterior: "AMS", propuesto: "Ohm" },
-        { persona: "Mauricio Rodrigo Navarro Rojas", anterior: "ITSM", propuesto: "Volta" },
-        { persona: "Mauricio Rodrigo Navarro Rojas", anterior: "HCM", propuesto: "Kelvin" },
-        { persona: "Mauricio Rodrigo Navarro Rojas", anterior: "CM", propuesto: "Newton" },
-        { persona: "Mauricio Rodrigo Navarro Rojas", anterior: "VMS", propuesto: "Lumen" },
-        { persona: "Mauricio Rodrigo Navarro Rojas", anterior: "MDM", propuesto: "Pascal" },
-        { persona: "Haegeth Eduardo Contla Martínez", anterior: "VMS", propuesto: "Horus" },
-        { persona: "Haegeth Eduardo Contla Martínez", anterior: "AMS", propuesto: "Atlas" },
-        { persona: "Haegeth Eduardo Contla Martínez", anterior: "ITSM", propuesto: "Hermes" },
-        { persona: "Haegeth Eduardo Contla Martínez", anterior: "CM", propuesto: "Apollo" },
-        { persona: "Haegeth Eduardo Contla Martínez", anterior: "HCM", propuesto: "Atenea" },
-        { persona: "Haegeth Eduardo Contla Martínez", anterior: "MDM", propuesto: "Chronos" },
-        { persona: "Carlos Alberto Álvarez Correa", anterior: "VMS", propuesto: "LENS" },
-        { persona: "Carlos Alberto Álvarez Correa", anterior: "VMS", propuesto: "IRIS" },
-        { persona: "Carlos Alberto Álvarez Correa", anterior: "AMS", propuesto: "TITAN" },
-        { persona: "Carlos Alberto Álvarez Correa", anterior: "ITSM", propuesto: "NERVE" },
-        { persona: "Carlos Alberto Álvarez Correa", anterior: "CM", propuesto: "PULSE" },
-        { persona: "Carlos Alberto Álvarez Correa", anterior: "HCM", propuesto: "ROOTS" },
-        { persona: "Carlos Alberto Álvarez Correa", anterior: "MDM", propuesto: "GENESIS" },
-        { persona: "Sofia Vazquez Jimenez", anterior: "VMS", propuesto: "Nexus" },
-        { persona: "Sofia Vazquez Jimenez", anterior: "MDM", propuesto: "Axis" },
-        { persona: "Sofia Vazquez Jimenez", anterior: "MDM", propuesto: "Genesis" }
-    ];
+// ── Lista blanca de correos autorizados ──────────────────────
+const CORREOS_AUTORIZADOS = new Set([
+    "eduardocontla@recursoconfiable.com",
+    "jorgecisneros@recursoconfiable.com",
+    "saidmancera@recursoconfiable.com",
+    "albertocolin@recursoconfiable.com",
+    "sofiavazquez@recursoconfiable.com",
+    "carlosalvarez@recursoconfiable.com",
+    "mauricionavarro@recursoconfiable.com"
+]);
 
-    const proponentesEmail = {
-        "Alberto Colin Enriquez": "albertocolin@recursoconfiable.com",
-        "Mauricio Rodrigo Navarro Rojas": "mauricionavarro@recursoconfiable.com",
-        "Haegeth Eduardo Contla Martínez": "eduardocontla@recursoconfiable.com",
-        "Carlos Alberto Álvarez Correa": "carlosalvarez@recursoconfiable.com",
-        "Sofia Vazquez Jimenez": "sofiavazquez@recursoconfiable.com"
-    };
+// ── Correos de proponentes ───────────────────────────────────
+const PROPONENTES_EMAIL = {
+    "Alberto Colin Enriquez":           "albertocolin@recursoconfiable.com",
+    "Mauricio Rodrigo Navarro Rojas":   "mauricionavarro@recursoconfiable.com",
+    "Haegeth Eduardo Contla Martínez":  "eduardocontla@recursoconfiable.com",
+    "Carlos Alberto Álvarez Correa":    "carlosalvarez@recursoconfiable.com",
+    "Sofia Vazquez Jimenez":            "sofiavazquez@recursoconfiable.com"
+};
 
-    let currentUserEmail = "";
-    let userVotesBySistema = new Map();
+// ── Propuestas ───────────────────────────────────────────────
+const PROPUESTAS = [
+    { persona: "Alberto Colin Enriquez",          anterior: "AMS",  propuesto: "NexAssets"  },
+    { persona: "Alberto Colin Enriquez",          anterior: "ITSM", propuesto: "NexService" },
+    { persona: "Alberto Colin Enriquez",          anterior: "HCM",  propuesto: "NexPeople"  },
+    { persona: "Alberto Colin Enriquez",          anterior: "CM",   propuesto: "NexClients" },
+    { persona: "Alberto Colin Enriquez",          anterior: "VMS",  propuesto: "NexTrack"   },
+    { persona: "Alberto Colin Enriquez",          anterior: "MDM",  propuesto: "NexData"    },
+    { persona: "Mauricio Rodrigo Navarro Rojas",  anterior: "AMS",  propuesto: "Ohm"        },
+    { persona: "Mauricio Rodrigo Navarro Rojas",  anterior: "ITSM", propuesto: "Volta"      },
+    { persona: "Mauricio Rodrigo Navarro Rojas",  anterior: "HCM",  propuesto: "Kelvin"     },
+    { persona: "Mauricio Rodrigo Navarro Rojas",  anterior: "CM",   propuesto: "Newton"     },
+    { persona: "Mauricio Rodrigo Navarro Rojas",  anterior: "VMS",  propuesto: "Lumen"      },
+    { persona: "Mauricio Rodrigo Navarro Rojas",  anterior: "MDM",  propuesto: "Pascal"     },
+    { persona: "Haegeth Eduardo Contla Martínez", anterior: "VMS",  propuesto: "Horus"      },
+    { persona: "Haegeth Eduardo Contla Martínez", anterior: "AMS",  propuesto: "Atlas"      },
+    { persona: "Haegeth Eduardo Contla Martínez", anterior: "ITSM", propuesto: "Hermes"     },
+    { persona: "Haegeth Eduardo Contla Martínez", anterior: "CM",   propuesto: "Apollo"     },
+    { persona: "Haegeth Eduardo Contla Martínez", anterior: "HCM",  propuesto: "Atenea"     },
+    { persona: "Haegeth Eduardo Contla Martínez", anterior: "MDM",  propuesto: "Chronos"    },
+    { persona: "Carlos Alberto Álvarez Correa",   anterior: "VMS",  propuesto: "LENS"       },
+    { persona: "Carlos Alberto Álvarez Correa",   anterior: "VMS",  propuesto: "IRIS"       },
+    { persona: "Carlos Alberto Álvarez Correa",   anterior: "AMS",  propuesto: "TITAN"      },
+    { persona: "Carlos Alberto Álvarez Correa",   anterior: "ITSM", propuesto: "NERVE"      },
+    { persona: "Carlos Alberto Álvarez Correa",   anterior: "CM",   propuesto: "PULSE"      },
+    { persona: "Carlos Alberto Álvarez Correa",   anterior: "HCM",  propuesto: "ROOTS"      },
+    { persona: "Carlos Alberto Álvarez Correa",   anterior: "MDM",  propuesto: "GENESIS"    },
+    { persona: "Sofia Vazquez Jimenez",           anterior: "VMS",  propuesto: "Nexus"      },
+    { persona: "Sofia Vazquez Jimenez",           anterior: "MDM",  propuesto: "Axis"       },
+    { persona: "Sofia Vazquez Jimenez",           anterior: "MDM",  propuesto: "Genesis"    }
+];
 
-    const emailSection = document.getElementById('emailSection');
-    const votingSection = document.getElementById('votingSection');
-    const userEmailInput = document.getElementById('userEmail');
-    const validateBtn = document.getElementById('validateEmailBtn');
-    const emailErrorDiv = document.getElementById('emailError');
-    const appRoot = document.getElementById('app-root');
+// ============================================================
+// ESTADO
+// ============================================================
+let currentUserEmail   = "";
+let userVotesBySistema = new Map(); // sistema → propuesta votada
 
-    function showMessage(text, isError = false) {
-        const toast = document.createElement('div');
-        toast.className = 'toast-message';
-        toast.innerText = text;
-        if (isError) toast.style.backgroundColor = "#d93025";
-        document.body.appendChild(toast);
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            setTimeout(() => toast.remove(), 500);
-        }, 3000);
-    }
+// ── DOM refs ────────────────────────────────────────────────
+const loginSection  = document.getElementById('loginSection');
+const userBanner    = document.getElementById('userBanner');
+const userBannerTxt = document.getElementById('userBannerText');
+const votingSection = document.getElementById('votingSection');
+const emailInput    = document.getElementById('userEmail');
+const enterBtn      = document.getElementById('enterBtn');
+const emailError    = document.getElementById('emailError');
+const appRoot       = document.getElementById('app-root');
 
-    function validateEmail(email) {
-        return /^[a-zA-Z0-9._%+-]+@recursoconfiable\.com$/.test(email);
-    }
+// ============================================================
+// UTILIDADES
+// ============================================================
+function showToast(msg, isError = false) {
+    const el = document.createElement('div');
+    el.className = 'toast' + (isError ? ' error' : '');
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 450);
+    }, 3200);
+}
 
-    function cargarVotosLocales(email) {
-        const key = `votos_${email}`;
-        const stored = localStorage.getItem(key);
-        if (stored) {
-            const obj = JSON.parse(stored);
-            userVotesBySistema.clear();
-            for (const [sistema, propuesta] of Object.entries(obj)) {
-                userVotesBySistema.set(sistema, propuesta);
-            }
-        } else {
-            userVotesBySistema.clear();
+function validarCorreo(email) {
+    return /^[a-zA-Z0-9._%+\-]+@recursoconfiable\.com$/.test(email.trim().toLowerCase());
+}
+
+// ============================================================
+// VOTOS LOCALES (localStorage como caché)
+// ============================================================
+function cargarVotosLocales(email) {
+    userVotesBySistema.clear();
+    try {
+        const raw = localStorage.getItem('votos_' + email);
+        if (raw) {
+            const obj = JSON.parse(raw);
+            for (const [k, v] of Object.entries(obj)) userVotesBySistema.set(k, v);
         }
-    }
+    } catch (_) {}
+}
 
-    function guardarVotoLocal(email, sistema, propuesta) {
-        const key = `votos_${email}`;
+function guardarVotoLocal(email, sistema, propuesta) {
+    try {
+        const key = 'votos_' + email;
         let obj = {};
-        const stored = localStorage.getItem(key);
-        if (stored) obj = JSON.parse(stored);
+        const raw = localStorage.getItem(key);
+        if (raw) obj = JSON.parse(raw);
         obj[sistema] = propuesta;
         localStorage.setItem(key, JSON.stringify(obj));
-        userVotesBySistema.set(sistema, propuesta);
+    } catch (_) {}
+    userVotesBySistema.set(sistema, propuesta);
+}
+
+// ============================================================
+// LÓGICA DE VOTO
+// ============================================================
+function puedeVotar(anterior, persona) {
+    if (userVotesBySistema.has(anterior)) return false;              // ya votó en este sistema
+    if (PROPONENTES_EMAIL[persona] === currentUserEmail) return false; // es su propia propuesta
+    return true;
+}
+
+async function enviarVoto(anterior, propuesto, persona) {
+    // Doble comprobación antes de enviar
+    if (userVotesBySistema.has(anterior)) {
+        showToast("❌ Ya emitiste tu voto para " + anterior, true);
+        return;
+    }
+    if (PROPONENTES_EMAIL[persona] === currentUserEmail) {
+        showToast("❌ No puedes votar por tu propia propuesta", true);
+        return;
     }
 
-    async function enviarVoto(anterior, propuesto, persona, userEmail) {
-        if (userVotesBySistema.has(anterior)) {
-            showMessage("❌ Ya votaste en este sistema", true);
-            return false;
-        }
-        if (proponentesEmail[persona] === userEmail) {
-            showMessage("❌ No puedes votar por tu propia propuesta", true);
-            return false;
-        }
+    const payload = {
+        email:     currentUserEmail,
+        sistema:   anterior,      // ← NombreAnterior en la sheet
+        propuesta: propuesto,     // ← NombrePropuesto en la sheet
+        persona:   persona,
+        timestamp: new Date().toISOString()
+    };
 
-        const payload = {
-            email: userEmail,
-            sistema: anterior,
-            propuesta: propuesto,
-            persona: persona,
-            timestamp: new Date().toISOString()
-        };
-
-        try {
-            const credentials = btoa(`${BASIC_AUTH_USER}:${BASIC_AUTH_PASS}`);
-            const response = await fetch(WEBHOOK_URL, {
-                method: "POST",
-                headers: {
-                    "Authorization": `Basic ${credentials}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(payload)
-            });
-            const data = await response.json();
-            if (response.ok && data.status === "success") {
-                guardarVotoLocal(userEmail, anterior, propuesto);
-                renderizar();
-                showMessage(`✅ Voto registrado para "${propuesto}" (${anterior})`);
-                return true;
-            } else {
-                throw new Error(data.message || "Error del servidor");
-            }
-        } catch (err) {
-            console.error(err);
-            showMessage(`❌ No se pudo registrar: ${err.message}`, true);
-            return false;
-        }
-    }
-
-    function puedeVotar(anterior, propuesto, personaPropuesta, userEmail) {
-        if (userVotesBySistema.has(anterior)) return false;
-        if (proponentesEmail[personaPropuesta] === userEmail) return false;
-        return true;
-    }
-
-    function renderizar() {
-        if (!appRoot) return;
-        const grupos = new Map();
-        for (let p of PROPUESTAS) {
-            if (!grupos.has(p.anterior)) grupos.set(p.anterior, []);
-            grupos.get(p.anterior).push(p);
-        }
-        let html = `<div class="groups-grid">`;
-        for (let [anterior, lista] of grupos.entries()) {
-            const yaVoto = userVotesBySistema.has(anterior);
-            html += `
-                <div class="group-card">
-                    <div class="group-header">
-                        <h2>📁 ${anterior}</h2>
-                        ${yaVoto ? '<span class="voted-badge">✓ Voto emitido</span>' : ''}
-                    </div>
-                    <div class="proposals-grid">
-            `;
-            for (let p of lista) {
-                const esPropia = (proponentesEmail[p.persona] === currentUserEmail);
-                const puede = puedeVotar(p.anterior, p.propuesto, p.persona, currentUserEmail);
-                const botonDisabled = !puede || yaVoto;
-                html += `
-                    <div class="proposal-item ${esPropia ? 'own-proposal' : ''}">
-                        <div class="prop-name">
-                            <span>✨ ${p.propuesto}</span>
-                        </div>
-                        <div class="proposer">👤 ${p.persona}</div>
-                        <button class="vote-btn" 
-                            data-anterior="${p.anterior}"
-                            data-propuesto="${p.propuesto}"
-                            data-persona="${p.persona}"
-                            ${botonDisabled ? 'disabled' : ''}>
-                            ${botonDisabled ? '🚫 No disponible' : '👍 Votar'}
-                        </button>
-                    </div>
-                `;
-            }
-            html += `</div></div>`;
-        }
-        html += `</div>`;
-        appRoot.innerHTML = html;
-
-        document.querySelectorAll('.vote-btn:not([disabled])').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                const anterior = btn.dataset.anterior;
-                const propuesto = btn.dataset.propuesto;
-                const persona = btn.dataset.persona;
-                btn.disabled = true;
-                btn.innerHTML = "⏳ ...";
-                await enviarVoto(anterior, propuesto, persona, currentUserEmail);
-                btn.innerHTML = "👍 Votar";
-                renderizar();
-            });
+    try {
+        const creds = btoa(BASIC_AUTH_USER + ":" + BASIC_AUTH_PASS);
+        const res   = await fetch(WEBHOOK_URL, {
+            method:  "POST",
+            headers: {
+                "Authorization": "Basic " + creds,
+                "Content-Type":  "application/json"
+            },
+            body: JSON.stringify(payload)
         });
-    }
 
-    function iniciarVotacion(email) {
-        currentUserEmail = email;
-        cargarVotosLocales(email);
-        votingSection.classList.remove('hidden');
-        emailSection.classList.add('hidden');
-        renderizar();
-    }
+        // n8n puede devolver 200 con { status: "success" } o simplemente 200
+        if (res.ok) {
+            let data = {};
+            try { data = await res.json(); } catch (_) {}
 
-    validateBtn.addEventListener('click', () => {
-        const email = userEmailInput.value.trim();
-        if (!validateEmail(email)) {
-            emailErrorDiv.innerText = "Correo no válido. Debe terminar en @recursoconfiable.com";
-            return;
+            // Aceptamos ok si status === "success" O si simplemente llegó 200
+            if (data.status === "success" || res.status === 200) {
+                guardarVotoLocal(currentUserEmail, anterior, propuesto);
+                renderizar();
+                showToast("✅ Voto registrado: \"" + propuesto + "\" para " + anterior);
+            } else {
+                throw new Error(data.message || "Respuesta inesperada del servidor");
+            }
+        } else {
+            const txt = await res.text();
+            throw new Error("HTTP " + res.status + " – " + txt.slice(0, 80));
         }
-        emailErrorDiv.innerText = "";
-        iniciarVotacion(email);
-    });
+    } catch (err) {
+        console.error("[Votación]", err);
+        showToast("❌ No se pudo registrar: " + err.message, true);
+    }
+}
 
-    userEmailInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') validateBtn.click();
-    });
+// ============================================================
+// RENDER
+// ============================================================
+function renderizar() {
+    // Agrupar por sistema anterior
+    const grupos = new Map();
+    for (const p of PROPUESTAS) {
+        if (!grupos.has(p.anterior)) grupos.set(p.anterior, []);
+        grupos.get(p.anterior).push(p);
+    }
 
-    votingSection.classList.add('hidden');
+    let html = '<div class="groups-grid">';
+
+    for (const [anterior, lista] of grupos) {
+        const yaVoto       = userVotesBySistema.has(anterior);
+        const votoEmitido  = userVotesBySistema.get(anterior) || null;
+
+        html += `
+          <div class="group-card">
+            <div class="group-header">
+              <h2>📁 ${anterior}</h2>
+              ${yaVoto ? '<span class="voted-badge">✓ Voto emitido</span>' : ''}
+            </div>
+            <div class="proposals-grid">
+        `;
+
+        for (const p of lista) {
+            const esPropia  = PROPONENTES_EMAIL[p.persona] === currentUserEmail;
+            const puede     = puedeVotar(p.anterior, p.persona);
+            const esEsteVoto = votoEmitido === p.propuesto;
+
+            html += `
+              <div class="proposal-item ${esPropia ? 'own-proposal' : ''}">
+                <div class="prop-name">✨ ${p.propuesto}</div>
+                <div class="proposer">👤 ${p.persona}</div>
+                <button class="vote-btn ${esEsteVoto ? 'voted-this' : ''}"
+                  data-anterior="${p.anterior}"
+                  data-propuesto="${p.propuesto}"
+                  data-persona="${encodeURIComponent(p.persona)}"
+                  ${!puede ? 'disabled' : ''}>
+                  ${esEsteVoto ? '✔ Tu voto' : !puede ? '🚫 No disponible' : '👍 Votar'}
+                </button>
+              </div>
+            `;
+        }
+
+        html += '</div></div>';
+    }
+
+    html += '</div>';
+    appRoot.innerHTML = html;
+
+    // Attach listeners
+    appRoot.querySelectorAll('.vote-btn:not([disabled])').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const anterior  = btn.dataset.anterior;
+            const propuesto = btn.dataset.propuesto;
+            const persona   = decodeURIComponent(btn.dataset.persona);
+            btn.disabled    = true;
+            btn.textContent = '⏳ Registrando…';
+            await enviarVoto(anterior, propuesto, persona);
+        });
+    });
+}
+
+// ============================================================
+// LOGIN
+// ============================================================
+function iniciarVotacion(email) {
+    currentUserEmail = email.trim().toLowerCase();
+    cargarVotosLocales(currentUserEmail);
+
+    // Mostrar banner de usuario
+    userBannerTxt.textContent = "Sesión activa: " + currentUserEmail;
+    userBanner.classList.remove('hidden');
+    loginSection.classList.add('hidden');
+    votingSection.classList.remove('hidden');
+
+    renderizar();
+}
+
+enterBtn.addEventListener('click', () => {
+    const email = emailInput.value.trim().toLowerCase();
+    emailError.textContent = '';
+
+    if (!validarCorreo(email)) {
+        emailError.textContent = "Escribe un correo válido @recursoconfiable.com";
+        return;
+    }
+    if (!CORREOS_AUTORIZADOS.has(email)) {
+        emailError.textContent = "❌ Este correo no está autorizado para votar.";
+        return;
+    }
+
+    iniciarVotacion(email);
+});
+
+emailInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') enterBtn.click();
+});
 </script>
 </body>
 </html>
