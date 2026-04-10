@@ -33,7 +33,6 @@
 
         .container { max-width: 1200px; margin: 0 auto; }
 
-        /* ── Card base ── */
         .card {
             background: white;
             border-radius: 16px;
@@ -43,7 +42,6 @@
             box-shadow: 0 1px 4px rgba(0,0,0,.06);
         }
 
-        /* ── Header ── */
         .header h1 {
             font-size: 1.75rem;
             font-weight: 600;
@@ -56,7 +54,6 @@
             font-size: .9rem;
         }
 
-        /* ── Login ── */
         .login-wrap {
             margin-top: 1.25rem;
             display: flex;
@@ -76,6 +73,7 @@
             outline: none;
         }
         .login-wrap input:focus { border-color: var(--blue); }
+
         .btn-primary {
             background: var(--blue);
             color: white;
@@ -89,10 +87,9 @@
             transition: opacity .15s;
         }
         .btn-primary:hover { opacity: .88; }
-        .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
         .error-msg { color: var(--red); font-size: .82rem; margin-top: .5rem; }
 
-        /* ── User banner ── */
         .user-banner {
             background: var(--blue-light);
             border: 1px solid #c5d8fb;
@@ -106,6 +103,42 @@
             align-items: center;
             gap: .5rem;
         }
+
+        /* ── Admin bar ── */
+        .admin-bar {
+            background: var(--yellow-light);
+            border: 1px solid var(--yellow);
+            border-radius: 10px;
+            padding: .75rem 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: .85rem;
+            color: var(--gray-text);
+            flex-wrap: wrap;
+        }
+        .admin-bar .admin-label {
+            font-weight: 600;
+            color: #7a5c00;
+        }
+        .admin-note {
+            font-size: .75rem;
+            color: var(--gray-text);
+        }
+        .btn-reset {
+            background: var(--red);
+            color: white;
+            border: none;
+            padding: 7px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: .82rem;
+            transition: opacity .15s;
+        }
+        .btn-reset:hover { opacity: .85; }
 
         /* ── Groups grid ── */
         .groups-grid {
@@ -138,7 +171,6 @@
             font-weight: 600;
         }
 
-        /* ── Proposals ── */
         .proposals-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -213,15 +245,16 @@
         }
         .toast.error { background: var(--red); }
 
-        /* ── Misc ── */
         .hidden { display: none; }
         .loader { text-align: center; padding: 3rem; color: var(--gray-text); }
+
         footer {
             text-align: center;
             margin-top: 2.5rem;
             font-size: .7rem;
             color: #80868b;
         }
+
         @media (max-width: 680px) {
             .groups-grid { grid-template-columns: 1fr; }
             .proposals-grid { grid-template-columns: 1fr; }
@@ -236,7 +269,6 @@
         <h1>🗳️ Votación de nombres</h1>
         <div class="sub">Recurso Confiable® · Elige las propuestas para cada sistema</div>
 
-        <!-- LOGIN (visible antes de autenticarse) -->
         <div id="loginSection">
             <div class="login-wrap">
                 <input type="email" id="userEmail"
@@ -247,7 +279,6 @@
             <div id="emailError" class="error-msg"></div>
         </div>
 
-        <!-- BANNER de usuario autenticado -->
         <div id="userBanner" class="user-banner hidden">
             <span>👤</span>
             <span id="userBannerText"></span>
@@ -256,6 +287,14 @@
 
     <!-- ── Voting area ── -->
     <div id="votingSection" class="hidden">
+
+        <!-- Panel admin — solo visible para mauricionavarro@ -->
+        <div id="adminBar" class="admin-bar hidden">
+            <span class="admin-label">🔧 Panel admin</span>
+            <button class="btn-reset" id="resetBtn">🗑️ Borrar mis votos de prueba</button>
+            <span class="admin-note">Solo limpia tu localStorage · la sheet no se modifica</span>
+        </div>
+
         <div id="app-root"><div class="loader">Cargando propuestas…</div></div>
     </div>
 
@@ -266,9 +305,10 @@
 // ============================================================
 // CONFIGURACIÓN
 // ============================================================
-const WEBHOOK_URL      = "https://workflow.grupoalefsi.com/webhook/4e2e714c-ff22-430e-8288-f1cd94d8fb9f";
-const BASIC_AUTH_USER  = "Mauricio";
-const BASIC_AUTH_PASS  = "Mauricio88";
+const WEBHOOK_URL     = "https://workflow.grupoalefsi.com/webhook/4e2e714c-ff22-430e-8288-f1cd94d8fb9f";
+const BASIC_AUTH_USER = "Mauricio";
+const BASIC_AUTH_PASS = "Mauricio88";
+const ADMIN_EMAIL     = "mauricionavarro@recursoconfiable.com";
 
 // ── Lista blanca de correos autorizados ──────────────────────
 const CORREOS_AUTORIZADOS = new Set([
@@ -326,7 +366,7 @@ const PROPUESTAS = [
 // ESTADO
 // ============================================================
 let currentUserEmail   = "";
-let userVotesBySistema = new Map(); // sistema → propuesta votada
+let userVotesBySistema = new Map();
 
 // ── DOM refs ────────────────────────────────────────────────
 const loginSection  = document.getElementById('loginSection');
@@ -337,6 +377,8 @@ const emailInput    = document.getElementById('userEmail');
 const enterBtn      = document.getElementById('enterBtn');
 const emailError    = document.getElementById('emailError');
 const appRoot       = document.getElementById('app-root');
+const adminBar      = document.getElementById('adminBar');
+const resetBtn      = document.getElementById('resetBtn');
 
 // ============================================================
 // UTILIDADES
@@ -357,7 +399,7 @@ function validarCorreo(email) {
 }
 
 // ============================================================
-// VOTOS LOCALES (localStorage como caché)
+// VOTOS LOCALES
 // ============================================================
 function cargarVotosLocales(email) {
     userVotesBySistema.clear();
@@ -382,17 +424,27 @@ function guardarVotoLocal(email, sistema, propuesta) {
     userVotesBySistema.set(sistema, propuesta);
 }
 
+// ── Reset admin ──────────────────────────────────────────────
+resetBtn.addEventListener('click', () => {
+    if (!confirm('¿Borrar todos tus votos de prueba?\n\nEsto solo limpia tu localStorage. La sheet NO se modifica.')) return;
+    Object.keys(localStorage)
+        .filter(k => k.startsWith('votos_'))
+        .forEach(k => localStorage.removeItem(k));
+    userVotesBySistema.clear();
+    renderizar();
+    showToast('✅ Votos de prueba borrados — ya puedes votar de nuevo');
+});
+
 // ============================================================
 // LÓGICA DE VOTO
 // ============================================================
 function puedeVotar(anterior, persona) {
-    if (userVotesBySistema.has(anterior)) return false;              // ya votó en este sistema
-    if (PROPONENTES_EMAIL[persona] === currentUserEmail) return false; // es su propia propuesta
+    if (userVotesBySistema.has(anterior)) return false;
+    if (PROPONENTES_EMAIL[persona] === currentUserEmail) return false;
     return true;
 }
 
 async function enviarVoto(anterior, propuesto, persona) {
-    // Doble comprobación antes de enviar
     if (userVotesBySistema.has(anterior)) {
         showToast("❌ Ya emitiste tu voto para " + anterior, true);
         return;
@@ -404,8 +456,8 @@ async function enviarVoto(anterior, propuesto, persona) {
 
     const payload = {
         email:     currentUserEmail,
-        sistema:   anterior,      // ← NombreAnterior en la sheet
-        propuesta: propuesto,     // ← NombrePropuesto en la sheet
+        sistema:   anterior,
+        propuesta: propuesto,
         persona:   persona,
         timestamp: new Date().toISOString()
     };
@@ -421,16 +473,13 @@ async function enviarVoto(anterior, propuesto, persona) {
             body: JSON.stringify(payload)
         });
 
-        // n8n puede devolver 200 con { status: "success" } o simplemente 200
         if (res.ok) {
             let data = {};
             try { data = await res.json(); } catch (_) {}
-
-            // Aceptamos ok si status === "success" O si simplemente llegó 200
             if (data.status === "success" || res.status === 200) {
                 guardarVotoLocal(currentUserEmail, anterior, propuesto);
                 renderizar();
-                showToast("✅ Voto registrado: \"" + propuesto + "\" para " + anterior);
+                showToast('✅ Voto registrado: "' + propuesto + '" para ' + anterior);
             } else {
                 throw new Error(data.message || "Respuesta inesperada del servidor");
             }
@@ -448,7 +497,6 @@ async function enviarVoto(anterior, propuesto, persona) {
 // RENDER
 // ============================================================
 function renderizar() {
-    // Agrupar por sistema anterior
     const grupos = new Map();
     for (const p of PROPUESTAS) {
         if (!grupos.has(p.anterior)) grupos.set(p.anterior, []);
@@ -458,8 +506,8 @@ function renderizar() {
     let html = '<div class="groups-grid">';
 
     for (const [anterior, lista] of grupos) {
-        const yaVoto       = userVotesBySistema.has(anterior);
-        const votoEmitido  = userVotesBySistema.get(anterior) || null;
+        const yaVoto      = userVotesBySistema.has(anterior);
+        const votoEmitido = userVotesBySistema.get(anterior) || null;
 
         html += `
           <div class="group-card">
@@ -471,8 +519,8 @@ function renderizar() {
         `;
 
         for (const p of lista) {
-            const esPropia  = PROPONENTES_EMAIL[p.persona] === currentUserEmail;
-            const puede     = puedeVotar(p.anterior, p.persona);
+            const esPropia   = PROPONENTES_EMAIL[p.persona] === currentUserEmail;
+            const puede      = puedeVotar(p.anterior, p.persona);
             const esEsteVoto = votoEmitido === p.propuesto;
 
             html += `
@@ -496,7 +544,6 @@ function renderizar() {
     html += '</div>';
     appRoot.innerHTML = html;
 
-    // Attach listeners
     appRoot.querySelectorAll('.vote-btn:not([disabled])').forEach(btn => {
         btn.addEventListener('click', async () => {
             const anterior  = btn.dataset.anterior;
@@ -516,11 +563,15 @@ function iniciarVotacion(email) {
     currentUserEmail = email.trim().toLowerCase();
     cargarVotosLocales(currentUserEmail);
 
-    // Mostrar banner de usuario
     userBannerTxt.textContent = "Sesión activa: " + currentUserEmail;
     userBanner.classList.remove('hidden');
     loginSection.classList.add('hidden');
     votingSection.classList.remove('hidden');
+
+    // Panel admin solo para Mauricio
+    if (currentUserEmail === ADMIN_EMAIL) {
+        adminBar.classList.remove('hidden');
+    }
 
     renderizar();
 }
