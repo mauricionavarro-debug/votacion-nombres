@@ -2,115 +2,94 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Recurso Confiable · Votación de Nombres</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recurso Confiable · Votación oficial</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Google Sans', 'Roboto', 'Segoe UI', system-ui, sans-serif;
-            background: #f5f7fa;
-            color: #202124;
+            font-family: 'Google Sans', 'Roboto', system-ui;
+            background: #f0f2f5;
             padding: 2rem 1rem;
+            color: #202124;
         }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
+        .container { max-width: 1200px; margin: 0 auto; }
+        .card {
             background: white;
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 1.5rem 2rem;
             margin-bottom: 2rem;
             border: 1px solid #e0e0e0;
         }
-
-        .header h1 {
-            font-size: 1.8rem;
+        .header h1 { font-size: 1.8rem; font-weight: 500; color: #1a73e8; }
+        .sub { color: #5f6368; margin-top: 0.5rem; }
+        .email-input {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        .email-input input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .email-input button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
             font-weight: 500;
-            color: #1a73e8;
-            margin-bottom: 0.25rem;
+            cursor: pointer;
         }
-
-        .header .sub {
-            color: #5f6368;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-        }
-
+        .error { color: #d93025; font-size: 0.85rem; margin-top: 0.5rem; }
         .groups-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(550px, 1fr));
             gap: 1.5rem;
+            margin-top: 1rem;
         }
-
         .group-card {
             background: white;
             border-radius: 12px;
             border: 1px solid #e0e0e0;
             overflow: hidden;
         }
-
         .group-header {
             background: #f8f9fa;
             padding: 1rem 1.5rem;
-            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-
-        .group-header h2 {
-            font-size: 1.35rem;
-            font-weight: 500;
-            color: #1a73e8;
-        }
-
+        .group-header h2 { font-size: 1.35rem; font-weight: 500; color: #1a73e8; }
+        .voted-badge { font-size: 0.7rem; background: #e6f4ea; color: #137333; padding: 2px 8px; border-radius: 20px; }
         .proposals-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 0.75rem;
             padding: 1.25rem;
         }
-
         .proposal-item {
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             padding: 0.9rem;
-            transition: background 0.2s;
         }
-
-        .proposal-item:hover {
-            background-color: #fef9e6;
-        }
-
         .prop-name {
             font-size: 1.1rem;
             font-weight: 500;
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            flex-wrap: wrap;
-            gap: 6px;
         }
-
-        .vote-count {
-            font-size: 0.75rem;
-            background: #e8eaed;
-            padding: 2px 8px;
-            border-radius: 30px;
-            color: #3c4043;
-        }
-
         .proposer {
             font-size: 0.7rem;
             color: #5f6368;
             margin: 8px 0 6px;
         }
-
         .vote-btn {
             background: transparent;
             border: 1px solid #dadce0;
@@ -121,19 +100,17 @@
             font-weight: 500;
             color: #1a73e8;
             cursor: pointer;
-            transition: all 0.2s;
         }
-
-        .vote-btn:hover {
-            background: #e8f0fe;
-            border-color: #1a73e8;
-        }
-
+        .vote-btn:hover:not(:disabled) { background: #e8f0fe; border-color: #1a73e8; }
         .vote-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            background: #f1f3f4;
         }
-
+        .own-proposal {
+            background-color: #fef7e0;
+            border-left: 3px solid #fbbc04;
+        }
         .toast-message {
             position: fixed;
             bottom: 20px;
@@ -145,124 +122,97 @@
             font-size: 0.8rem;
             z-index: 1000;
         }
-
-        .debug-panel {
-            margin-top: 2rem;
-            background: #f1f3f4;
-            border-radius: 12px;
-            padding: 0.75rem;
-            font-family: monospace;
-            font-size: 0.7rem;
-            color: #3c4043;
-            border: 1px solid #e0e0e0;
-            max-height: 200px;
-            overflow: auto;
-        }
-
         footer {
             text-align: center;
             margin-top: 2rem;
             font-size: 0.7rem;
             color: #80868b;
         }
-
         @media (max-width: 700px) {
-            .groups-grid {
-                grid-template-columns: 1fr;
-            }
-            .proposals-grid {
-                grid-template-columns: 1fr;
-            }
+            .groups-grid { grid-template-columns: 1fr; }
+            .proposals-grid { grid-template-columns: 1fr; }
         }
-
-        .loader {
-            text-align: center;
-            padding: 2rem;
-            color: #5f6368;
-        }
-
-        button.test-btn {
-            background: #1a73e8;
-            color: white;
-            border: none;
-            padding: 4px 12px;
-            border-radius: 16px;
-            cursor: pointer;
-            font-size: 0.7rem;
-            margin-bottom: 8px;
-        }
+        .loader { text-align: center; padding: 2rem; color: #5f6368; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="header">
-        <div style="font-size:0.85rem; color:#5f6368;">Recurso Confiable®</div>
+    <div class="card header">
         <h1>Votación de nombres</h1>
-        <div class="sub">Selecciona tu propuesta favorita para cada sistema. Un voto por opción.</div>
+        <div class="sub">Recurso Confiable® · Elige las propuestas para cada sistema</div>
+        <div class="email-input" id="emailSection">
+            <input type="email" id="userEmail" placeholder="tu-correo@recursoconfiable.com" pattern=".*@recursoconfiable\.com$" required>
+            <button id="validateEmailBtn">Ingresar</button>
+        </div>
+        <div id="emailError" class="error"></div>
     </div>
 
-    <div id="app-root">
-        <div class="loader">Cargando propuestas...</div>
+    <div id="votingSection" class="hidden">
+        <div id="app-root"><div class="loader">Cargando propuestas...</div></div>
     </div>
-    
-    <div class="debug-panel" id="debugLog">
-        <button class="test-btn" id="testConnectionBtn">🔍 Probar conexión al Web App</button>
-        <div id="logContent">📡 Esperando acciones...</div>
-    </div>
-    
-    <footer>Los votos se registran automáticamente en la hoja oficial</footer>
+    <footer>Los votos se registran automáticamente</footer>
 </div>
 
 <script>
-    // ================= DATOS DE PROPUESTAS =================
-    const PROPOSALS_RAW = [
-        { persona: "Alberto Colin Enriquez", nombreAnterior: "AMS", nombrePropuesto: "NexAssets" },
-        { persona: "Alberto Colin Enriquez", nombreAnterior: "ITSM", nombrePropuesto: "NexService" },
-        { persona: "Alberto Colin Enriquez", nombreAnterior: "HCM", nombrePropuesto: "NexPeople" },
-        { persona: "Alberto Colin Enriquez", nombreAnterior: "CM", nombrePropuesto: "NexClients" },
-        { persona: "Alberto Colin Enriquez", nombreAnterior: "VMS", nombrePropuesto: "NexTrack" },
-        { persona: "Alberto Colin Enriquez", nombreAnterior: "MDM", nombrePropuesto: "NexData" },
-        { persona: "Mauricio Rodrigo Navarro Rojas", nombreAnterior: "AMS", nombrePropuesto: "Ohm" },
-        { persona: "Mauricio Rodrigo Navarro Rojas", nombreAnterior: "ITSM", nombrePropuesto: "Volta" },
-        { persona: "Mauricio Rodrigo Navarro Rojas", nombreAnterior: "HCM", nombrePropuesto: "Kelvin" },
-        { persona: "Mauricio Rodrigo Navarro Rojas", nombreAnterior: "CM", nombrePropuesto: "Newton" },
-        { persona: "Mauricio Rodrigo Navarro Rojas", nombreAnterior: "VMS", nombrePropuesto: "Lumen" },
-        { persona: "Mauricio Rodrigo Navarro Rojas", nombreAnterior: "MDM", nombrePropuesto: "Pascal" },
-        { persona: "Haegeth Eduardo Contla Martínez", nombreAnterior: "VMS", nombrePropuesto: "Horus" },
-        { persona: "Haegeth Eduardo Contla Martínez", nombreAnterior: "AMS", nombrePropuesto: "Atlas" },
-        { persona: "Haegeth Eduardo Contla Martínez", nombreAnterior: "ITSM", nombrePropuesto: "Hermes" },
-        { persona: "Haegeth Eduardo Contla Martínez", nombreAnterior: "CM", nombrePropuesto: "Apollo" },
-        { persona: "Haegeth Eduardo Contla Martínez", nombreAnterior: "HCM", nombrePropuesto: "Atenea" },
-        { persona: "Haegeth Eduardo Contla Martínez", nombreAnterior: "MDM", nombrePropuesto: "Chronos" },
-        { persona: "Carlos Alberto Álvarez Correa", nombreAnterior: "VMS", nombrePropuesto: "LENS" },
-        { persona: "Carlos Alberto Álvarez Correa", nombreAnterior: "VMS", nombrePropuesto: "IRIS" },
-        { persona: "Carlos Alberto Álvarez Correa", nombreAnterior: "AMS", nombrePropuesto: "TITAN" },
-        { persona: "Carlos Alberto Álvarez Correa", nombreAnterior: "ITSM", nombrePropuesto: "NERVE" },
-        { persona: "Carlos Alberto Álvarez Correa", nombreAnterior: "CM", nombrePropuesto: "PULSE" },
-        { persona: "Carlos Alberto Álvarez Correa", nombreAnterior: "HCM", nombrePropuesto: "ROOTS" },
-        { persona: "Carlos Alberto Álvarez Correa", nombreAnterior: "MDM", nombrePropuesto: "GENESIS" },
-        { persona: "Sofia Vazquez Jimenez", nombreAnterior: "VMS", nombrePropuesto: "Nexus" },
-        { persona: "Sofia Vazquez Jimenez", nombreAnterior: "MDM", nombrePropuesto: "Axis" },
-        { persona: "Sofia Vazquez Jimenez", nombreAnterior: "MDM", nombrePropuesto: "Genesis" }
+    // ============================================================
+    // 1. CONFIGURACIÓN DEL WEBHOOK (TUS DATOS)
+    // ============================================================
+    const WEBHOOK_URL = "https://workflow.grupoalefsi.com/webhook/4e2e714c-ff22-430e-8288-f1cd94d8fb9f";
+    const BASIC_AUTH_USER = "BAU Mauricio";
+    const BASIC_AUTH_PASS = "BAP Mauricio88";
+
+    // ============================================================
+    // 2. DATOS DE PROPUESTAS Y CORREOS DE PROPONENTES
+    // ============================================================
+    const PROPUESTAS = [
+        { persona: "Alberto Colin Enriquez", anterior: "AMS", propuesto: "NexAssets" },
+        { persona: "Alberto Colin Enriquez", anterior: "ITSM", propuesto: "NexService" },
+        { persona: "Alberto Colin Enriquez", anterior: "HCM", propuesto: "NexPeople" },
+        { persona: "Alberto Colin Enriquez", anterior: "CM", propuesto: "NexClients" },
+        { persona: "Alberto Colin Enriquez", anterior: "VMS", propuesto: "NexTrack" },
+        { persona: "Alberto Colin Enriquez", anterior: "MDM", propuesto: "NexData" },
+        { persona: "Mauricio Rodrigo Navarro Rojas", anterior: "AMS", propuesto: "Ohm" },
+        { persona: "Mauricio Rodrigo Navarro Rojas", anterior: "ITSM", propuesto: "Volta" },
+        { persona: "Mauricio Rodrigo Navarro Rojas", anterior: "HCM", propuesto: "Kelvin" },
+        { persona: "Mauricio Rodrigo Navarro Rojas", anterior: "CM", propuesto: "Newton" },
+        { persona: "Mauricio Rodrigo Navarro Rojas", anterior: "VMS", propuesto: "Lumen" },
+        { persona: "Mauricio Rodrigo Navarro Rojas", anterior: "MDM", propuesto: "Pascal" },
+        { persona: "Haegeth Eduardo Contla Martínez", anterior: "VMS", propuesto: "Horus" },
+        { persona: "Haegeth Eduardo Contla Martínez", anterior: "AMS", propuesto: "Atlas" },
+        { persona: "Haegeth Eduardo Contla Martínez", anterior: "ITSM", propuesto: "Hermes" },
+        { persona: "Haegeth Eduardo Contla Martínez", anterior: "CM", propuesto: "Apollo" },
+        { persona: "Haegeth Eduardo Contla Martínez", anterior: "HCM", propuesto: "Atenea" },
+        { persona: "Haegeth Eduardo Contla Martínez", anterior: "MDM", propuesto: "Chronos" },
+        { persona: "Carlos Alberto Álvarez Correa", anterior: "VMS", propuesto: "LENS" },
+        { persona: "Carlos Alberto Álvarez Correa", anterior: "VMS", propuesto: "IRIS" },
+        { persona: "Carlos Alberto Álvarez Correa", anterior: "AMS", propuesto: "TITAN" },
+        { persona: "Carlos Alberto Álvarez Correa", anterior: "ITSM", propuesto: "NERVE" },
+        { persona: "Carlos Alberto Álvarez Correa", anterior: "CM", propuesto: "PULSE" },
+        { persona: "Carlos Alberto Álvarez Correa", anterior: "HCM", propuesto: "ROOTS" },
+        { persona: "Carlos Alberto Álvarez Correa", anterior: "MDM", propuesto: "GENESIS" },
+        { persona: "Sofia Vazquez Jimenez", anterior: "VMS", propuesto: "Nexus" },
+        { persona: "Sofia Vazquez Jimenez", anterior: "MDM", propuesto: "Axis" },
+        { persona: "Sofia Vazquez Jimenez", anterior: "MDM", propuesto: "Genesis" }
     ];
 
-    // 👇 URL DEL WEB APP (actualízala aquí si cambia)
-    const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzL_ApjJ5l1gQFb4-ndJE9z4GIlLF1cLfH0FoqtwLtylIsEUBS2x9EbdkRsrPuHWFpibQ/exec";
+    const proponentesEmail = {
+        "Alberto Colin Enriquez": "albertocolin@recursoconfiable.com",
+        "Mauricio Rodrigo Navarro Rojas": "mauricionavarro@recursoconfiable.com",
+        "Haegeth Eduardo Contla Martínez": "eduardocontla@recursoconfiable.com",
+        "Carlos Alberto Álvarez Correa": "carlosalvarez@recursoconfiable.com",
+        "Sofia Vazquez Jimenez": "sofiavazquez@recursoconfiable.com"
+    };
 
-    let votesMap = new Map();  // almacén local de votos
+    let currentUserEmail = "";
+    let userVotesBySistema = new Map();
 
-    // Elementos DOM
-    const rootElement = document.getElementById('app-root');
-    const logContent = document.getElementById('logContent');
-
-    function addLog(msg, isError = false) {
-        const p = document.createElement('div');
-        p.textContent = new Date().toLocaleTimeString() + " - " + msg;
-        if (isError) p.style.color = "#d93025";
-        logContent.appendChild(p);
-        logContent.scrollTop = logContent.scrollHeight;
-        console.log(msg);
-    }
+    const emailSection = document.getElementById('emailSection');
+    const votingSection = document.getElementById('votingSection');
+    const userEmailInput = document.getElementById('userEmail');
+    const validateBtn = document.getElementById('validateEmailBtn');
+    const emailErrorDiv = document.getElementById('emailError');
+    const appRoot = document.getElementById('app-root');
 
     function showMessage(text, isError = false) {
         const toast = document.createElement('div');
@@ -276,201 +226,165 @@
         }, 3000);
     }
 
-    // Prueba manual de conexión al Web App
-    async function testConnection() {
-        addLog("🔍 Probando conexión a: " + WEBAPP_URL);
-        try {
-            const response = await fetch(`${WEBAPP_URL}?action=getVotes&t=${Date.now()}`, {
-                method: 'GET',
-                cache: 'no-store'
-            });
-            addLog(`✅ GET respuesta HTTP: ${response.status}`);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const data = await response.json();
-            addLog(`📦 Datos recibidos: ${JSON.stringify(data).substring(0, 200)}`);
-            if (data && data.votesMap) {
-                addLog(`✅ Web App funcionando correctamente. Votos: ${Object.keys(data.votesMap).length}`);
-                showMessage("✅ Web App responde correctamente");
-            } else {
-                addLog("⚠️ El Web App no devolvió votesMap", true);
+    function validateEmail(email) {
+        return /^[a-zA-Z0-9._%+-]+@recursoconfiable\.com$/.test(email);
+    }
+
+    function cargarVotosLocales(email) {
+        const key = `votos_${email}`;
+        const stored = localStorage.getItem(key);
+        if (stored) {
+            const obj = JSON.parse(stored);
+            userVotesBySistema.clear();
+            for (const [sistema, propuesta] of Object.entries(obj)) {
+                userVotesBySistema.set(sistema, propuesta);
             }
-        } catch (err) {
-            addLog(`❌ ERROR: ${err.message}`, true);
-            showMessage("❌ No se pudo conectar al Web App. Revisa la URL y los permisos.", true);
+        } else {
+            userVotesBySistema.clear();
         }
     }
 
-    // Cargar votos desde el Web App
-    async function fetchVotesFromSheet() {
-        addLog("🔄 Cargando votos desde el Web App...");
-        try {
-            const response = await fetch(`${WEBAPP_URL}?action=getVotes&t=${Date.now()}`, {
-                method: 'GET',
-                cache: 'no-store'
-            });
-            addLog(`GET respuesta: ${response.status}`);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const data = await response.json();
-            addLog(`Datos recibidos: ${JSON.stringify(data).substring(0, 150)}`);
-            if (data && data.votesMap) {
-                const newMap = new Map();
-                for (const [key, count] of Object.entries(data.votesMap)) {
-                    newMap.set(key, count);
-                }
-                return newMap;
-            }
-            return new Map();
-        } catch (err) {
-            addLog(`❌ Error cargando votos: ${err.message}`, true);
-            showMessage("⚠️ No se pudo conectar con la hoja de votos. Modo local solamente.", true);
-            return new Map();
-        }
+    function guardarVotoLocal(email, sistema, propuesta) {
+        const key = `votos_${email}`;
+        let obj = {};
+        const stored = localStorage.getItem(key);
+        if (stored) obj = JSON.parse(stored);
+        obj[sistema] = propuesta;
+        localStorage.setItem(key, JSON.stringify(obj));
+        userVotesBySistema.set(sistema, propuesta);
     }
 
-    // Enviar un voto
-    async function sendVote(nombreAnterior, nombrePropuesto, persona) {
-        const key = `${nombreAnterior}|${nombrePropuesto}|${persona}`;
-        addLog(`📤 Enviando voto para ${nombrePropuesto} (${nombreAnterior})...`);
+    async function enviarVoto(anterior, propuesto, persona, userEmail) {
+        if (userVotesBySistema.has(anterior)) {
+            showMessage("❌ Ya votaste en este sistema", true);
+            return false;
+        }
+        if (proponentesEmail[persona] === userEmail) {
+            showMessage("❌ No puedes votar por tu propia propuesta", true);
+            return false;
+        }
+
+        const payload = {
+            email: userEmail,
+            sistema: anterior,
+            propuesta: propuesto,
+            persona: persona,
+            timestamp: new Date().toISOString()
+        };
+
         try {
-            const payload = {
-                action: 'submitVote',
-                nombreAnterior: nombreAnterior,
-                nombrePropuesto: nombrePropuesto,
-                persona: persona,
-                timestamp: new Date().toISOString()
-            };
-            const response = await fetch(WEBAPP_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            const credentials = btoa(`${BASIC_AUTH_USER}:${BASIC_AUTH_PASS}`);
+            const response = await fetch(WEBHOOK_URL, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Basic ${credentials}`,
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify(payload)
             });
-            addLog(`POST respuesta: ${response.status}`);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const result = await response.json();
-            addLog(`Respuesta POST: ${JSON.stringify(result)}`);
-            if (result.status === 'success') {
-                const current = votesMap.get(key) || 0;
-                votesMap.set(key, current + 1);
-                renderAllGroups();
-                showMessage(`✅ Voto registrado: "${nombrePropuesto}" (${nombreAnterior})`);
-                addLog(`✅ Voto exitoso. Nuevo total: ${current+1}`);
+            const data = await response.json();
+            if (response.ok && data.status === "success") {
+                guardarVotoLocal(userEmail, anterior, propuesto);
+                renderizar();
+                showMessage(`✅ Voto registrado para "${propuesto}" (${anterior})`);
                 return true;
             } else {
-                throw new Error(result.message || 'Error desconocido');
+                throw new Error(data.message || "Error del servidor");
             }
         } catch (err) {
-            addLog(`❌ Error en voto: ${err.message}`, true);
+            console.error(err);
             showMessage(`❌ No se pudo registrar: ${err.message}`, true);
             return false;
         }
     }
 
-    // Agrupar propuestas por nombreAnterior
-    function groupProposalsByPrevious(proposalsArray) {
-        const groups = new Map();
-        proposalsArray.forEach(prop => {
-            const anterior = prop.nombreAnterior;
-            if (!groups.has(anterior)) groups.set(anterior, []);
-            groups.get(anterior).push({
-                persona: prop.persona,
-                nombrePropuesto: prop.nombrePropuesto,
-                voteKey: `${anterior}|${prop.nombrePropuesto}|${prop.persona}`
-            });
-        });
-        for (let [key, list] of groups.entries()) {
-            list.sort((a,b) => a.nombrePropuesto.localeCompare(b.nombrePropuesto));
-            groups.set(key, list);
-        }
-        return groups;
+    function puedeVotar(anterior, propuesto, personaPropuesta, userEmail) {
+        if (userVotesBySistema.has(anterior)) return false;
+        if (proponentesEmail[personaPropuesta] === userEmail) return false;
+        return true;
     }
 
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-
-    function renderAllGroups() {
-        if (!rootElement) return;
-        const groups = groupProposalsByPrevious(PROPOSALS_RAW);
-        if (groups.size === 0) {
-            rootElement.innerHTML = '<div class="loader">⚠️ No hay propuestas</div>';
-            return;
+    function renderizar() {
+        if (!appRoot) return;
+        const grupos = new Map();
+        for (let p of PROPUESTAS) {
+            if (!grupos.has(p.anterior)) grupos.set(p.anterior, []);
+            grupos.get(p.anterior).push(p);
         }
-
         let html = `<div class="groups-grid">`;
-        const sortedGroups = Array.from(groups.keys()).sort();
-        for (let anterior of sortedGroups) {
-            const proposals = groups.get(anterior);
+        for (let [anterior, lista] of grupos.entries()) {
+            const yaVoto = userVotesBySistema.has(anterior);
             html += `
                 <div class="group-card">
                     <div class="group-header">
-                        <h2>📁 ${escapeHtml(anterior)}</h2>
+                        <h2>📁 ${anterior}</h2>
+                        ${yaVoto ? '<span class="voted-badge">✓ Voto emitido</span>' : ''}
                     </div>
                     <div class="proposals-grid">
             `;
-            proposals.forEach(prop => {
-                const key = prop.voteKey;
-                const voteCount = votesMap.get(key) || 0;
-                const safeNombre = escapeHtml(prop.nombrePropuesto);
-                const safePersona = escapeHtml(prop.persona);
-                const safeAnterior = escapeHtml(anterior);
+            for (let p of lista) {
+                const esPropia = (proponentesEmail[p.persona] === currentUserEmail);
+                const puede = puedeVotar(p.anterior, p.propuesto, p.persona, currentUserEmail);
+                const botonDisabled = !puede || yaVoto;
                 html += `
-                    <div class="proposal-item">
+                    <div class="proposal-item ${esPropia ? 'own-proposal' : ''}">
                         <div class="prop-name">
-                            <span>✨ ${safeNombre}</span>
-                            <span class="vote-count">${voteCount} voto${voteCount !== 1 ? 's' : ''}</span>
+                            <span>✨ ${p.propuesto}</span>
                         </div>
-                        <div class="proposer">👤 ${safePersona}</div>
-                        <button class="vote-btn" data-anterior="${safeAnterior}" data-propuesto="${safeNombre}" data-persona="${safePersona}">
-                            👍 Votar
+                        <div class="proposer">👤 ${p.persona}</div>
+                        <button class="vote-btn" 
+                            data-anterior="${p.anterior}"
+                            data-propuesto="${p.propuesto}"
+                            data-persona="${p.persona}"
+                            ${botonDisabled ? 'disabled' : ''}>
+                            ${botonDisabled ? '🚫 No disponible' : '👍 Votar'}
                         </button>
                     </div>
                 `;
-            });
+            }
             html += `</div></div>`;
         }
         html += `</div>`;
-        rootElement.innerHTML = html;
+        appRoot.innerHTML = html;
 
-        // Asignar eventos a los botones
-        document.querySelectorAll('.vote-btn').forEach(btn => {
+        document.querySelectorAll('.vote-btn:not([disabled])').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.preventDefault();
-                const anterior = btn.getAttribute('data-anterior');
-                const propuesto = btn.getAttribute('data-propuesto');
-                const persona = btn.getAttribute('data-persona');
+                const anterior = btn.dataset.anterior;
+                const propuesto = btn.dataset.propuesto;
+                const persona = btn.dataset.persona;
                 btn.disabled = true;
-                btn.innerHTML = '⏳ ...';
-                await sendVote(anterior, propuesto, persona);
-                btn.innerHTML = '👍 Votar';
-                btn.disabled = false;
+                btn.innerHTML = "⏳ ...";
+                await enviarVoto(anterior, propuesto, persona, currentUserEmail);
+                btn.innerHTML = "👍 Votar";
+                renderizar();
             });
         });
     }
 
-    async function init() {
-        rootElement.innerHTML = '<div class="loader">📄 Cargando votos...</div>';
-        const fetchedVotes = await fetchVotesFromSheet();
-        if (fetchedVotes && fetchedVotes.size > 0) {
-            votesMap = fetchedVotes;
-            addLog(`✅ ${fetchedVotes.size} votos cargados.`);
-        } else {
-            votesMap = new Map();
-            addLog("ℹ️ No hay votos previos. Comienza votando.");
-        }
-        renderAllGroups();
+    function iniciarVotacion(email) {
+        currentUserEmail = email;
+        cargarVotosLocales(email);
+        votingSection.classList.remove('hidden');
+        emailSection.classList.add('hidden');
+        renderizar();
     }
 
-    // Configurar botón de prueba
-    document.getElementById('testConnectionBtn').addEventListener('click', testConnection);
+    validateBtn.addEventListener('click', () => {
+        const email = userEmailInput.value.trim();
+        if (!validateEmail(email)) {
+            emailErrorDiv.innerText = "Correo no válido. Debe terminar en @recursoconfiable.com";
+            return;
+        }
+        emailErrorDiv.innerText = "";
+        iniciarVotacion(email);
+    });
 
-    // Iniciar
-    init();
+    userEmailInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') validateBtn.click();
+    });
+
+    votingSection.classList.add('hidden');
 </script>
 </body>
 </html>
