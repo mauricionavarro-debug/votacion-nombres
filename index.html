@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Recurso Confiable · Votación de Nombres</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f4f7fc;
+            color: #1a2c3e;
+            padding: 2rem 1.5rem;
+        }
+
+        :root {
+            --rc-orange: #FF6C00;
+            --rc-blue: #1F3A6B;
+            --rc-gray: #7A7E82;
+            --rc-gray-light: #E6E9ED;
+            --rc-blue-dark: #12284D;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .logo-placeholder {
+            background: var(--rc-blue);
+            color: white;
+            padding: 0.5rem 2rem;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: inline-block;
+        }
+
+        .brand h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--rc-blue), var(--rc-orange));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .header p {
+            color: var(--rc-gray);
+            max-width: 650px;
+            margin: 0.5rem auto 0;
+            background: rgba(255,255,240,0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            font-size: 0.95rem;
+        }
+
+        .groups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .group-card {
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+            border: 1px solid rgba(255,108,0,0.2);
+            transition: all 0.2s;
+        }
+
+        .group-card:hover {
+            border-color: var(--rc-orange);
+        }
+
+        .group-header {
+            background: linear-gradient(135deg, var(--rc-blue), var(--rc-blue-dark));
+            padding: 1rem 1.5rem;
+            color: white;
+        }
+
+        .group-header h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .group-header h2 small {
+            font-size: 0.8rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-weight: 400;
+        }
+
+        .proposals-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            padding: 1.2rem;
+        }
+
+        .proposal-item {
+            background: #ffffff;
+            border-radius: 1rem;
+            border: 1px solid #e9edf2;
+            padding: 0.8rem;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        .proposal-item:hover {
+            background: #fffbf5;
+            border-left: 3px solid var(--rc-orange);
+        }
+
+        .prop-name {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--rc-blue-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .vote-count {
+            background: var(--rc-gray-light);
+            padding: 0.1rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--rc-blue);
+        }
+
+        .proposer {
+            font-size: 0.7rem;
+            color: var(--rc-gray);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .vote-btn {
+            margin-top: 10px;
+            background: white;
+            border: 1.5px solid var(--rc-orange);
+            width: 100%;
+            padding: 0.4rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: var(--rc-orange);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .vote-btn:hover {
+            background: var(--rc-orange);
+            color: white;
+            transform: scale(0.97);
+        }
+
+        .vote-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .toast-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--rc-blue-dark);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            border-left: 4px solid var(--rc-orange);
+            z-index: 1000;
+            pointer-events: none;
+            font-family: monospace;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.7rem;
+            color: var(--rc-gray);
+        }
+
+        @media (max-width: 700px) {
+            .groups-grid {
+                grid-template-columns: 1fr;
+            }
+            .proposals-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .loader {
+            text-align: center;
+            padding: 3rem;
+            color: var(--rc-blue);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo-container">
+            <div class="logo-placeholder">
+                🏢 Recurso Confiable®
+            </div>
+        </div>
+        <div class="brand">
+            <h1>Votación de Nombres</h1>
+        </div>
+        <p>🗳️ Elige el nuevo nombre para cada sistema (AMS, ITSM, HCM, CM, VMS, MDM)</p>
+    </div>
+
+    <div id="app-root">
+        <div class="loader">📡 Cargando propuestas y votos...</div>
+    </div>
+    <footer>Los votos se guardan en la hoja oficial de Recurso Confiable</footer>
+</div>
+
+<script>
+    // ================= DATOS DE PROPUESTAS =================
+    const PROPOSALS_RAW = [
+        { persona: "Alberto Colin Enriquez", nombreAnterior: "AMS", nombrePropuesto: "NexAssets" },
+        { persona: "Alberto Colin Enriquez", nombreAnterior: "ITSM", nombrePropuesto: "NexService" },
+        { persona: "Alberto Colin Enriquez", nombreAnterior: "HCM", nombrePropuesto: "NexPeople" },
+        { persona: "Alberto Colin Enriquez", nombreAnterior: "CM", nombrePropuesto: "NexClients" },
+        { persona: "Alberto Colin Enriquez", nombreAnterior: "VMS", nombrePropuesto: "NexTrack" },
+        { persona: "Alberto Colin Enriquez", nombreAnterior: "MDM", nombrePropuesto: "NexData" },
+        { persona: "Mauricio Rodrigo Navarro Rojas", nombreAnterior: "AMS", nombrePropuesto: "Ohm" },
+        { persona: "Mauricio Rodrigo Navarro Rojas", nombreAnterior: "ITSM", nombrePropuesto: "Volta" },
+        { persona: "Mauricio Rodrigo Navarro Rojas", nombreAnterior: "HCM", nombrePropuesto: "Kelvin" },
+        { persona: "Mauricio Rodrigo Navarro Rojas", nombreAnterior: "CM", nombrePropuesto: "Newton" },
+        { persona: "Mauricio Rodrigo Navarro Rojas", nombreAnterior: "VMS", nombrePropuesto: "Lumen" },
+        { persona: "Mauricio Rodrigo Navarro Rojas", nombreAnterior: "MDM", nombrePropuesto: "Pascal" },
+        { persona: "Haegeth Eduardo Contla Martínez", nombreAnterior: "VMS", nombrePropuesto: "Horus" },
+        { persona: "Haegeth Eduardo Contla Martínez", nombreAnterior: "AMS", nombrePropuesto: "Atlas" },
+        { persona: "Haegeth Eduardo Contla Martínez", nombreAnterior: "ITSM", nombrePropuesto: "Hermes" },
+        { persona: "Haegeth Eduardo Contla Martínez", nombreAnterior: "CM", nombrePropuesto: "Apollo" },
+        { persona: "Haegeth Eduardo Contla Martínez", nombreAnterior: "HCM", nombrePropuesto: "Atenea" },
+        { persona: "Haegeth Eduardo Contla Martínez", nombreAnterior: "MDM", nombrePropuesto: "Chronos" },
+        { persona: "Carlos Alberto Álvarez Correa", nombreAnterior: "VMS", nombrePropuesto: "LENS" },
+        { persona: "Carlos Alberto Álvarez Correa", nombreAnterior: "VMS", nombrePropuesto: "IRIS" },
+        { persona: "Carlos Alberto Álvarez Correa", nombreAnterior: "AMS", nombrePropuesto: "TITAN" },
+        { persona: "Carlos Alberto Álvarez Correa", nombreAnterior: "ITSM", nombrePropuesto: "NERVE" },
+        { persona: "Carlos Alberto Álvarez Correa", nombreAnterior: "CM", nombrePropuesto: "PULSE" },
+        { persona: "Carlos Alberto Álvarez Correa", nombreAnterior: "HCM", nombrePropuesto: "ROOTS" },
+        { persona: "Carlos Alberto Álvarez Correa", nombreAnterior: "MDM", nombrePropuesto: "GENESIS" },
+        { persona: "Sofia Vazquez Jimenez", nombreAnterior: "VMS", nombrePropuesto: "Nexus" },
+        { persona: "Sofia Vazquez Jimenez", nombreAnterior: "MDM", nombrePropuesto: "Axis" },
+        { persona: "Sofia Vazquez Jimenez", nombreAnterior: "MDM", nombrePropuesto: "Genesis" }
+    ];
+
+    // ✅ URL CORRECTA DE TU WEB APP (la que diste)
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/a/macros/recursoconfiable.com/s/AKfycbz1-b3jUfCUTPQ2ePqr2zXW9a26zBu0PJuPUtjgPs8g_zjfG4O5ZOfLugVE9QrZ7L-j/exec";
+
+    let votesMap = new Map();
+    let rootElement = document.getElementById('app-root');
+
+    function showMessage(text, isError = false) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-message';
+        toast.innerText = text;
+        if (isError) toast.style.borderLeftColor = '#e34f4f';
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 500);
+        }, 2800);
+    }
+
+    async function fetchVotesFromSheet() {
+        try {
+            const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getVotes&t=${Date.now()}`, {
+                method: 'GET',
+                cache: 'no-store'
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            if (data && data.votesMap) {
+                const newMap = new Map();
+                for (const [key, count] of Object.entries(data.votesMap)) {
+                    newMap.set(key, count);
+                }
+                return newMap;
+            }
+            return new Map();
+        } catch (err) {
+            console.error("Error cargando votos:", err);
+            showMessage("⚠️ No se pudo conectar con la hoja de votos. Los votos solo se verán localmente.", true);
+            return new Map();
+        }
+    }
+
+    async function sendVote(nombreAnterior, nombrePropuesto, persona) {
+        const key = `${nombreAnterior}|${nombrePropuesto}|${persona}`;
+        try {
+            const payload = {
+                action: 'submitVote',
+                nombreAnterior: nombreAnterior,
+                nombrePropuesto: nombrePropuesto,
+                persona: persona,
+                timestamp: new Date().toISOString()
+            };
+            const response = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(`Error ${response.status}`);
+            const result = await response.json();
+            if (result.status === 'success') {
+                const current = votesMap.get(key) || 0;
+                votesMap.set(key, current + 1);
+                renderAllGroups();
+                showMessage(`✅ Voto registrado para "${nombrePropuesto}" (${nombreAnterior})`);
+                return true;
+            } else {
+                throw new Error(result.message || 'Error desconocido');
+            }
+        } catch (err) {
+            console.error("Error enviando voto:", err);
+            showMessage(`❌ No se pudo registrar: ${err.message}`, true);
+            return false;
+        }
+    }
+
+    function groupProposalsByPrevious(proposalsArray) {
+        const groups = new Map();
+        proposalsArray.forEach(prop => {
+            const anterior = prop.nombreAnterior;
+            if (!groups.has(anterior)) groups.set(anterior, []);
+            groups.get(anterior).push({
+                persona: prop.persona,
+                nombrePropuesto: prop.nombrePropuesto,
+                voteKey: `${anterior}|${prop.nombrePropuesto}|${prop.persona}`
+            });
+        });
+        for (let [key, list] of groups.entries()) {
+            list.sort((a,b) => a.nombrePropuesto.localeCompare(b.nombrePropuesto));
+            groups.set(key, list);
+        }
+        return groups;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function renderAllGroups() {
+        if (!rootElement) return;
+        const groups = groupProposalsByPrevious(PROPOSALS_RAW);
+        if (groups.size === 0) {
+            rootElement.innerHTML = '<div class="loader">⚠️ No hay propuestas</div>';
+            return;
+        }
+
+        let html = `<div class="groups-grid">`;
+        const sortedGroups = Array.from(groups.keys()).sort();
+        for (let anterior of sortedGroups) {
+            const proposals = groups.get(anterior);
+            html += `
+                <div class="group-card">
+                    <div class="group-header">
+                        <h2>📁 ${escapeHtml(anterior)} <small>sistema</small></h2>
+                    </div>
+                    <div class="proposals-grid">
+            `;
+            proposals.forEach(prop => {
+                const key = prop.voteKey;
+                const voteCount = votesMap.get(key) || 0;
+                const safeNombre = escapeHtml(prop.nombrePropuesto);
+                const safePersona = escapeHtml(prop.persona);
+                const safeAnterior = escapeHtml(anterior);
+                html += `
+                    <div class="proposal-item">
+                        <div class="prop-name">
+                            <span>✨ ${safeNombre}</span>
+                            <span class="vote-count">🗳️ ${voteCount}</span>
+                        </div>
+                        <div class="proposer">👤 ${safePersona}</div>
+                        <button class="vote-btn" data-anterior="${safeAnterior}" data-propuesto="${safeNombre}" data-persona="${safePersona}">
+                            👍 Votar
+                        </button>
+                    </div>
+                `;
+            });
+            html += `</div></div>`;
+        }
+        html += `</div>`;
+        rootElement.innerHTML = html;
+
+        document.querySelectorAll('.vote-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const anterior = btn.getAttribute('data-anterior');
+                const propuesto = btn.getAttribute('data-propuesto');
+                const persona = btn.getAttribute('data-persona');
+                btn.disabled = true;
+                btn.innerHTML = '⏳ ...';
+                await sendVote(anterior, propuesto, persona);
+                btn.innerHTML = '👍 Votar';
+                btn.disabled = false;
+            });
+        });
+    }
+
+    async function init() {
+        rootElement.innerHTML = '<div class="loader">📊 Cargando votos desde la hoja...</div>';
+        const fetchedVotes = await fetchVotesFromSheet();
+        if (fetchedVotes && fetchedVotes.size > 0) {
+            votesMap = fetchedVotes;
+            showMessage(`📊 ${fetchedVotes.size} propuestas con votos cargados`, false);
+        } else {
+            votesMap = new Map();
+            showMessage("📋 Sin votos previos. ¡Sé el primero en votar!", false);
+        }
+        renderAllGroups();
+    }
+
+    init();
+</script>
+</body>
+</html>
