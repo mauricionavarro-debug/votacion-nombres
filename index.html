@@ -23,11 +23,9 @@
             margin: 0 auto;
         }
 
-        /* Encabezado tipo Google Forms */
         .header {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.05);
             padding: 1.5rem 2rem;
             margin-bottom: 2rem;
             border: 1px solid #e0e0e0;
@@ -43,43 +41,25 @@
         .header .sub {
             color: #5f6368;
             font-size: 0.9rem;
-            border-top: 1px solid #e0e0e0;
-            margin-top: 0.75rem;
-            padding-top: 0.75rem;
+            margin-top: 0.5rem;
         }
 
-        .logo-text {
-            font-size: 0.85rem;
-            color: #5f6368;
-            margin-bottom: 0.5rem;
-            letter-spacing: 0.5px;
-        }
-
-        /* Grid de grupos */
         .groups-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(550px, 1fr));
             gap: 1.5rem;
-            margin-top: 0.5rem;
         }
 
-        /* Tarjeta de grupo (como sección de formulario) */
         .group-card {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.05);
             border: 1px solid #e0e0e0;
             overflow: hidden;
-            transition: box-shadow 0.2s;
-        }
-
-        .group-card:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
         }
 
         .group-header {
-            padding: 1rem 1.5rem;
             background: #f8f9fa;
+            padding: 1rem 1.5rem;
             border-bottom: 1px solid #e0e0e0;
         }
 
@@ -87,21 +67,8 @@
             font-size: 1.35rem;
             font-weight: 500;
             color: #1a73e8;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
-        .group-header h2 small {
-            font-size: 0.7rem;
-            font-weight: normal;
-            background: #e8eaed;
-            padding: 2px 8px;
-            border-radius: 30px;
-            color: #5f6368;
-        }
-
-        /* Lista de propuestas en dos columnas */
         .proposals-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -109,24 +76,20 @@
             padding: 1.25rem;
         }
 
-        /* Cada propuesta como una "pregunta" */
         .proposal-item {
-            background: #ffffff;
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             padding: 0.9rem;
-            transition: all 0.2s;
+            transition: background 0.2s;
         }
 
         .proposal-item:hover {
             background-color: #fef9e6;
-            border-color: #fbbc04;
         }
 
         .prop-name {
             font-size: 1.1rem;
             font-weight: 500;
-            color: #202124;
             display: flex;
             justify-content: space-between;
             align-items: baseline;
@@ -140,20 +103,15 @@
             padding: 2px 8px;
             border-radius: 30px;
             color: #3c4043;
-            font-weight: 500;
         }
 
         .proposer {
             font-size: 0.7rem;
             color: #5f6368;
-            margin: 8px 0 6px 0;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            margin: 8px 0 6px;
         }
 
         .vote-btn {
-            margin-top: 8px;
             background: transparent;
             border: 1px solid #dadce0;
             border-radius: 24px;
@@ -164,10 +122,6 @@
             color: #1a73e8;
             cursor: pointer;
             transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
         }
 
         .vote-btn:hover {
@@ -178,24 +132,31 @@
         .vote-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            background: #f1f3f4;
         }
 
-        /* Mensaje tipo toast */
         .toast-message {
             position: fixed;
-            bottom: 24px;
-            right: 24px;
+            bottom: 20px;
+            right: 20px;
             background: #323232;
             color: white;
             padding: 8px 20px;
             border-radius: 32px;
             font-size: 0.8rem;
-            font-weight: 500;
             z-index: 1000;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-            pointer-events: none;
+        }
+
+        .debug-panel {
+            margin-top: 2rem;
+            background: #f1f3f4;
+            border-radius: 12px;
+            padding: 0.75rem;
             font-family: monospace;
+            font-size: 0.7rem;
+            color: #3c4043;
+            border: 1px solid #e0e0e0;
+            max-height: 200px;
+            overflow: auto;
         }
 
         footer {
@@ -203,8 +164,6 @@
             margin-top: 2rem;
             font-size: 0.7rem;
             color: #80868b;
-            border-top: 1px solid #e0e0e0;
-            padding-top: 1.5rem;
         }
 
         @media (max-width: 700px) {
@@ -214,9 +173,6 @@
             .proposals-grid {
                 grid-template-columns: 1fr;
             }
-            .header {
-                padding: 1rem;
-            }
         }
 
         .loader {
@@ -224,12 +180,23 @@
             padding: 2rem;
             color: #5f6368;
         }
+
+        button.test-btn {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <div class="logo-text">Recurso Confiable®</div>
+        <div style="font-size:0.85rem; color:#5f6368;">Recurso Confiable®</div>
         <h1>Votación de nombres</h1>
         <div class="sub">Selecciona tu propuesta favorita para cada sistema. Un voto por opción.</div>
     </div>
@@ -237,6 +204,12 @@
     <div id="app-root">
         <div class="loader">Cargando propuestas...</div>
     </div>
+    
+    <div class="debug-panel" id="debugLog">
+        <button class="test-btn" id="testConnectionBtn">🔍 Probar conexión al Web App</button>
+        <div id="logContent">📡 Esperando acciones...</div>
+    </div>
+    
     <footer>Los votos se registran automáticamente en la hoja oficial</footer>
 </div>
 
@@ -273,33 +246,72 @@
         { persona: "Sofia Vazquez Jimenez", nombreAnterior: "MDM", nombrePropuesto: "Genesis" }
     ];
 
-    // URL actualizada del Web App (la última que diste)
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzL_ApjJ5l1gQFb4-ndJE9z4GIlLF1cLfH0FoqtwLtylIsEUBS2x9EbdkRsrPuHWFpibQ/exec";
-";
+    // 👇 URL DEL WEB APP (actualízala aquí si cambia)
+    const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzL_ApjJ5l1gQFb4-ndJE9z4GIlLF1cLfH0FoqtwLtylIsEUBS2x9EbdkRsrPuHWFpibQ/exec";
 
-    let votesMap = new Map();
-    let rootElement = document.getElementById('app-root');
+    let votesMap = new Map();  // almacén local de votos
+
+    // Elementos DOM
+    const rootElement = document.getElementById('app-root');
+    const logContent = document.getElementById('logContent');
+
+    function addLog(msg, isError = false) {
+        const p = document.createElement('div');
+        p.textContent = new Date().toLocaleTimeString() + " - " + msg;
+        if (isError) p.style.color = "#d93025";
+        logContent.appendChild(p);
+        logContent.scrollTop = logContent.scrollHeight;
+        console.log(msg);
+    }
 
     function showMessage(text, isError = false) {
         const toast = document.createElement('div');
         toast.className = 'toast-message';
         toast.innerText = text;
-        if (isError) toast.style.backgroundColor = '#d93025';
+        if (isError) toast.style.backgroundColor = "#d93025";
         document.body.appendChild(toast);
         setTimeout(() => {
             toast.style.opacity = '0';
             setTimeout(() => toast.remove(), 500);
-        }, 2800);
+        }, 3000);
     }
 
-    async function fetchVotesFromSheet() {
+    // Prueba manual de conexión al Web App
+    async function testConnection() {
+        addLog("🔍 Probando conexión a: " + WEBAPP_URL);
         try {
-            const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getVotes&t=${Date.now()}`, {
+            const response = await fetch(`${WEBAPP_URL}?action=getVotes&t=${Date.now()}`, {
                 method: 'GET',
                 cache: 'no-store'
             });
+            addLog(`✅ GET respuesta HTTP: ${response.status}`);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
+            addLog(`📦 Datos recibidos: ${JSON.stringify(data).substring(0, 200)}`);
+            if (data && data.votesMap) {
+                addLog(`✅ Web App funcionando correctamente. Votos: ${Object.keys(data.votesMap).length}`);
+                showMessage("✅ Web App responde correctamente");
+            } else {
+                addLog("⚠️ El Web App no devolvió votesMap", true);
+            }
+        } catch (err) {
+            addLog(`❌ ERROR: ${err.message}`, true);
+            showMessage("❌ No se pudo conectar al Web App. Revisa la URL y los permisos.", true);
+        }
+    }
+
+    // Cargar votos desde el Web App
+    async function fetchVotesFromSheet() {
+        addLog("🔄 Cargando votos desde el Web App...");
+        try {
+            const response = await fetch(`${WEBAPP_URL}?action=getVotes&t=${Date.now()}`, {
+                method: 'GET',
+                cache: 'no-store'
+            });
+            addLog(`GET respuesta: ${response.status}`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            addLog(`Datos recibidos: ${JSON.stringify(data).substring(0, 150)}`);
             if (data && data.votesMap) {
                 const newMap = new Map();
                 for (const [key, count] of Object.entries(data.votesMap)) {
@@ -309,14 +321,16 @@
             }
             return new Map();
         } catch (err) {
-            console.error("Error cargando votos:", err);
-            showMessage("⚠️ No se pudo conectar con la hoja de votos. Los votos solo se verán localmente.", true);
+            addLog(`❌ Error cargando votos: ${err.message}`, true);
+            showMessage("⚠️ No se pudo conectar con la hoja de votos. Modo local solamente.", true);
             return new Map();
         }
     }
 
+    // Enviar un voto
     async function sendVote(nombreAnterior, nombrePropuesto, persona) {
         const key = `${nombreAnterior}|${nombrePropuesto}|${persona}`;
+        addLog(`📤 Enviando voto para ${nombrePropuesto} (${nombreAnterior})...`);
         try {
             const payload = {
                 action: 'submitVote',
@@ -325,29 +339,33 @@
                 persona: persona,
                 timestamp: new Date().toISOString()
             };
-            const response = await fetch(GOOGLE_SCRIPT_URL, {
+            const response = await fetch(WEBAPP_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            if (!response.ok) throw new Error(`Error ${response.status}`);
+            addLog(`POST respuesta: ${response.status}`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const result = await response.json();
+            addLog(`Respuesta POST: ${JSON.stringify(result)}`);
             if (result.status === 'success') {
                 const current = votesMap.get(key) || 0;
                 votesMap.set(key, current + 1);
                 renderAllGroups();
                 showMessage(`✅ Voto registrado: "${nombrePropuesto}" (${nombreAnterior})`);
+                addLog(`✅ Voto exitoso. Nuevo total: ${current+1}`);
                 return true;
             } else {
                 throw new Error(result.message || 'Error desconocido');
             }
         } catch (err) {
-            console.error("Error enviando voto:", err);
+            addLog(`❌ Error en voto: ${err.message}`, true);
             showMessage(`❌ No se pudo registrar: ${err.message}`, true);
             return false;
         }
     }
 
+    // Agrupar propuestas por nombreAnterior
     function groupProposalsByPrevious(proposalsArray) {
         const groups = new Map();
         proposalsArray.forEach(prop => {
@@ -391,7 +409,7 @@
             html += `
                 <div class="group-card">
                     <div class="group-header">
-                        <h2>📁 ${escapeHtml(anterior)} <small>sistema</small></h2>
+                        <h2>📁 ${escapeHtml(anterior)}</h2>
                     </div>
                     <div class="proposals-grid">
             `;
@@ -407,7 +425,7 @@
                             <span>✨ ${safeNombre}</span>
                             <span class="vote-count">${voteCount} voto${voteCount !== 1 ? 's' : ''}</span>
                         </div>
-                        <div class="proposer">${safePersona}</div>
+                        <div class="proposer">👤 ${safePersona}</div>
                         <button class="vote-btn" data-anterior="${safeAnterior}" data-propuesto="${safeNombre}" data-persona="${safePersona}">
                             👍 Votar
                         </button>
@@ -419,6 +437,7 @@
         html += `</div>`;
         rootElement.innerHTML = html;
 
+        // Asignar eventos a los botones
         document.querySelectorAll('.vote-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.preventDefault();
@@ -426,7 +445,7 @@
                 const propuesto = btn.getAttribute('data-propuesto');
                 const persona = btn.getAttribute('data-persona');
                 btn.disabled = true;
-                btn.innerHTML = '⏳ Enviando...';
+                btn.innerHTML = '⏳ ...';
                 await sendVote(anterior, propuesto, persona);
                 btn.innerHTML = '👍 Votar';
                 btn.disabled = false;
@@ -439,14 +458,18 @@
         const fetchedVotes = await fetchVotesFromSheet();
         if (fetchedVotes && fetchedVotes.size > 0) {
             votesMap = fetchedVotes;
-            showMessage(`${fetchedVotes.size} propuestas con votos cargados`, false);
+            addLog(`✅ ${fetchedVotes.size} votos cargados.`);
         } else {
             votesMap = new Map();
-            showMessage("Sin votos previos. ¡Sé el primero en votar!", false);
+            addLog("ℹ️ No hay votos previos. Comienza votando.");
         }
         renderAllGroups();
     }
 
+    // Configurar botón de prueba
+    document.getElementById('testConnectionBtn').addEventListener('click', testConnection);
+
+    // Iniciar
     init();
 </script>
 </body>
